@@ -52,7 +52,9 @@ export default function Home() {
           {prices && <span>for {prices?.amount} month</span>}
         </p>
 
-        <SubscribeButton onClick={() => null} priceId={prices!.priceId} />
+        {prices && (
+          <SubscribeButton onClick={() => null} priceId={prices!.priceId} />
+        )}
       </section>
       <Image src={HomeSvg} alt="Avatar" />
     </main>
