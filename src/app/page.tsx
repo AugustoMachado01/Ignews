@@ -1,7 +1,8 @@
 "use client";
 
 import styles from "./home.module.scss";
-import axios from "axios";
+import { getSession } from "next-auth/react";
+
 import Image from "next/image";
 import HomeSvg from "../../public/images/avatar.svg";
 import { metadata } from "./layout";
@@ -34,8 +35,6 @@ export default function Home() {
         currency: "USD",
       }).format(Number(price.unit_amount_decimal)),
     };
-
-    console.log(price);
 
     setPrices(product);
   }
