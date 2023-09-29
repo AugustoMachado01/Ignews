@@ -4,5 +4,8 @@ namespace NodeJS {
     NEXT_PUBLIC_GITHUB_CLIENT_ID: string;
     NEXT_PUBLIC_GITHUB_CLIENT_SECRET: string;
     NEXT_PUBLIC_FAUNADB_KEY: string;
+    NEXT_PUBLIC_SIGNINKEY: string;
+    NEXT_PUBLIC_SUCCESS_URL: string;
+    NEXT_PUBLIC_CANCEL_URL: string;
   }
 }
