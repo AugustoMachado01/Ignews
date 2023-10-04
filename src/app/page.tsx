@@ -1,8 +1,6 @@
 "use client";
 
 import styles from "./home.module.scss";
-import { getSession } from "next-auth/react";
-
 import Image from "next/image";
 import HomeSvg from "../../public/images/avatar.svg";
 import { metadata } from "./layout";
