@@ -1,36 +1,26 @@
-import { stripe } from "@/services/pricing";
-import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
+import { loadStripe } from "@stripe/stripe-js";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === "POST") {
-    const session = await getSession({ req });
+interface Props {
+  customer: string;
+  payment_method_types: ["card"];
+  billing_address_collection: "required";
+  lineItems: { price: string | undefined; quantity: number | undefined }[];
+}
+export async function checkout({ lineItems }: Props) {
+  let stripePromise = null;
 
-    const stripeCustomer = await stripe.customers.create({
-      email: session?.user?.email!,
-    });
+  function getStripeJs() {
+    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY);
 
-    const stripeCheckoutSession = await stripe.checkout.sessions.create({
-      customer: stripeCustomer.id,
-      payment_method_types: ["card"],
-      billing_address_collection: "required",
-      line_items: [
-        {
-          price: "price_1Ns5aOIHY7irfuQ9O8WpX79M",
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      allow_promotion_codes: true,
-      success_url: process.env.NEXT_PUBLIC_SUCCESS_URL,
-      cancel_url: process.env.NEXT_PUBLIC_CANCEL_URL,
-    });
-
-    return res.status(123).json({ sessionId: stripeCheckoutSession.id });
-  } else {
-    res.setHeader("Allow", "POST");
-    res.status(405).end("Method not allowed");
+    return stripePromise;
   }
-};
 
-export default handler;
+  const stripe = await getStripeJs();
+
+  await stripe?.redirectToCheckout({
+    mode: "subscription",
+    lineItems,
+    successUrl: `${window.location.origin}/post`,
+    cancelUrl: window.location.origin,
+  });
+}
