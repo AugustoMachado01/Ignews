@@ -2,10 +2,8 @@ import { headers } from "next/headers";
 import { stripe } from "@/services/pricing";
 
 import Stripe from "stripe";
-import { NextRequest, NextResponse } from "next/server";
-import { buffer } from "node:stream/consumers";
-import { NextApiRequest, NextApiResponse } from "next";
-// import { Buffer } from "buffer";
+import { NextResponse } from "next/server";
+import { saveSubscription } from "../manageSubscription";
 
 export async function POST(req: Request) {
   const payload = await req.text();
@@ -20,14 +18,25 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOKS_SECRET
     );
 
-    if (event.type) {
-      console.log(event);
+    const { type } = event;
+
+    if (type) {
+      switch (type) {
+        case "checkout.session.completed":
+          const checkoutSession = event.data.object as Stripe.Checkout.Session;
+          if (checkoutSession.subscription && checkoutSession.customer) {
+            await saveSubscription(
+              checkoutSession.subscription.toString(),
+              checkoutSession.customer.toString()
+            );
+          }
+          break;
+        default:
+          throw Error("Unhandled event.");
+      }
     }
   } catch (err: any) {
-    return new NextResponse(
-      `webhook signature verification failed ${err.message}`,
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "webhook handler failed" });
   }
   return new NextResponse("received", { status: 200 });
 }
