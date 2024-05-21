@@ -4,7 +4,6 @@ import { signIn, useSession, signOut } from "next-auth/react";
 import styles from "./styles.module.scss";
 import { api } from "../../app/services/api";
 import { getStripeJs } from "../../app/services/stripe-js";
-import { headers } from "next/headers";
 
 interface SubscribeButtonProps {
   priceId: string;
@@ -19,15 +18,22 @@ export function SubscribeButton({ priceId }: SubscribeButtonProps) {
       return;
     }
 
-    const { data } = await api.post("/subscribe");
+    try {
+      const response = await api.post("/subscribe");
 
-    console.log("test data ===", data);
+      const { sessionId } = response.data;
 
-    // window.location.assign(data);
+      console.log("session ==", sessionId);
 
-    // const stripe = await getStripeJs();
+      // window.location.assign(data);
 
-    // await stripe?.redirectToCheckout(data);
+      const stripe = await getStripeJs();
+
+      await stripe?.redirectToCheckout({ sessionId });
+    } catch (error: any) {
+      console.log("erro in subscribe", error.message);
+      alert(error.message);
+    }
   }
   return (
     <button
