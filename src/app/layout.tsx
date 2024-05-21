@@ -3,7 +3,7 @@ import "./styles/global.scss";
 import type { Metadata } from "next";
 
 import { Inter, Roboto } from "next/font/google";
-import Header from "./components/Header/page";
+import Header from "../components/Header/page";
 import { NextAuthProvider } from "./provider";
 
 const inter = Inter({ subsets: ["latin"] });

@@ -10,7 +10,7 @@ export async function checkout({ lineItems }: Props) {
   let stripePromise = null;
 
   function getStripeJs() {
-    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY);
+    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY as string);
 
     return stripePromise;
   }
