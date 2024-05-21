@@ -1,45 +1,50 @@
-import { headers } from "next/headers";
-import { stripe } from "@/services/pricing";
+import { NextRequest, NextResponse } from "next/server";
 
-import Stripe from "stripe";
-import { NextResponse } from "next/server";
-import { saveSubscription } from "../manageSubscription";
-
-export async function POST(req: Request) {
-  const payload = await req.text();
-  const secret = headers().get("stripe-signature") as string;
-
-  let event: Stripe.Event;
-
-  try {
-    event = stripe.webhooks.constructEvent(
-      payload,
-      secret!,
-      process.env.STRIPE_WEBHOOKS_SECRET
-    );
-
-    const { type } = event;
-
-    if (type) {
-      switch (type) {
-        case "checkout.session.completed":
-          const checkoutSession = event.data.object as Stripe.Checkout.Session;
-          if (checkoutSession.subscription && checkoutSession.customer) {
-            await saveSubscription(
-              checkoutSession.subscription.toString(),
-              checkoutSession.customer.toString()
-            );
-          }
-          break;
-        default:
-          throw Error("Unhandled event.");
-      }
-    }
-  } catch (err: any) {
-    return NextResponse.json({ error: "webhook handler failed" });
-  }
-  return new NextResponse("received", { status: 200 });
+export async function POST(request: NextRequest) {
+  return NextResponse.json({ status: 200 });
 }
+// import { headers } from "next/headers";
+// import { stripe } from "@/services/pricing";
+
+// import Stripe from "stripe";
+// import { NextResponse } from "next/server";
+// import { saveSubscription } from "../manageSubscription";
+
+// export async function POST(req: Request) {
+//   const payload = await req.text();
+//   const secret = headers().get("stripe-signature") as string;
+
+//   let event: Stripe.Event;
+
+//   try {
+//     event = stripe.webhooks.constructEvent(
+//       payload,
+//       secret!,
+//       process.env.STRIPE_WEBHOOKS_SECRET
+//     );
+
+//     const { type } = event;
+
+//     if (type) {
+//       switch (type) {
+//         case "checkout.session.completed":
+//           const checkoutSession = event.data.object as Stripe.Checkout.Session;
+//           if (checkoutSession.subscription && checkoutSession.customer) {
+//             await saveSubscription(
+//               checkoutSession.subscription.toString(),
+//               checkoutSession.customer.toString()
+//             );
+//           }
+//           break;
+//         default:
+//           throw Error("Unhandled event.");
+//       }
+//     }
+//   } catch (err: any) {
+//     return NextResponse.json({ error: "webhook handler failed" });
+//   }
+//   return new NextResponse("received", { status: 200 });
+// }
 
 // async function handler(req: NextRequest) {
 //   // const buf = await buffer(req.text());
