@@ -1,7 +1,40 @@
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { stripe } from "../../services/pricing";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const relevantEvent = new Set(["checkout.session.completed"]);
 
 export async function POST(request: NextRequest) {
-  return NextResponse.json({ status: 200 });
+  const buf = await request.text();
+  const secret = headers().get("stripe-signature");
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      buf,
+      secret!,
+      process.env.STRIPE_WEBHOOK_SECRET as string
+    );
+
+    const { type } = event;
+
+    if (!relevantEvent.has(type)) {
+      console.log("evento recebido com sucesso", event);
+    }
+    return NextResponse.json({ received: true });
+  } catch (error: any) {
+    return NextResponse.json(`webhook handler failed ${error.message}`, {
+      status: 400,
+    });
+  }
 }
 // import { headers } from "next/headers";
 // import { stripe } from "@/services/pricing";
